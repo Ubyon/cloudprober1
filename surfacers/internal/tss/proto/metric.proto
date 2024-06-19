@@ -1,0 +1,42 @@
+syntax = "proto3";
+    
+message Label {
+    enum Scope {
+        INVALID=0;
+        ORG=1;
+        RESOURCE=2;
+    }
+
+    string key = 1;
+    string value = 2;
+    Label.Scope scope = 3;
+}
+
+message ResourceMetric {
+    enum Type {
+        INVALID = 0;
+        HTTP = 1;
+        HTTPS = 2;
+    }
+    enum GeneratedBy {
+        UNKNOWN = 0;
+        TG = 1;
+    }
+    enum Kind {
+        UNKNOWN = 0;
+        COUNTER = 1;
+        GUAGE = 2;
+    }
+
+    ResourceMetric.Type type = 1;
+    ResourceMetric.Kind kind = 2;
+    string name = 3;
+    string value = 4;
+    repeated Label labels = 5;
+    string org_id = 6;
+    string resource_id = 7;
+    string resource_name = 8;
+    ResourceMetric.GeneratedBy generated_by = 9;
+
+    google.protobuf.Timestamp timestamp = 15;
+}
