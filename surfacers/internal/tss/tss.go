@@ -27,7 +27,6 @@ import (
 	"github.com/cloudprober/cloudprober/metrics"
 	"github.com/cloudprober/cloudprober/surfacers/internal/common/options"
     tsspb "github.com/cloudprober/cloudprober/surfacers/internal/tss/proto"
-	"github.com/lib/pq"
 
     "bitbucket.org/ubyon/golibs/ubyon/tssclient"
 )
