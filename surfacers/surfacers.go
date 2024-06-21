@@ -45,6 +45,7 @@ import (
 	"github.com/cloudprober/cloudprober/surfacers/internal/prometheus"
 	"github.com/cloudprober/cloudprober/surfacers/internal/pubsub"
 	"github.com/cloudprober/cloudprober/surfacers/internal/stackdriver"
+	"github.com/cloudprober/cloudprober/surfacers/internal/tss"
 	"github.com/cloudprober/cloudprober/web/formatutils"
 
 	surfacerpb "github.com/cloudprober/cloudprober/surfacers/proto"
@@ -219,6 +220,9 @@ func initSurfacer(ctx context.Context, s *surfacerpb.SurfacerDef, sType surfacer
 	case surfacerpb.Type_OTEL:
 		surfacer, err = otel.New(ctx, s.GetOtelSurfacer(), opts, l)
 		conf = s.GetOtelSurfacer()
+	case surfacerpb.Type_TSS:
+		surfacer, err = tss.New(ctx, s.GetTssSurfacer(), l)
+		conf = s.GetTssSurfacer()
 	case surfacerpb.Type_USER_DEFINED:
 		userDefinedSurfacersMu.Lock()
 		defer userDefinedSurfacersMu.Unlock()
