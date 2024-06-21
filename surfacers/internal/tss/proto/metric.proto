@@ -1,6 +1,6 @@
 syntax = "proto3";
     
-message Label {
+message MetricLabel {
     enum Scope {
         INVALID=0;
         ORG=1;
@@ -9,14 +9,13 @@ message Label {
 
     string key = 1;
     string value = 2;
-    Label.Scope scope = 3;
+    MetricLabel.Scope scope = 3;
 }
 
 message ResourceMetric {
     enum Type {
         INVALID = 0;
         HTTP = 1;
-        HTTPS = 2;
     }
     enum GeneratedBy {
         UNKNOWN = 0;
@@ -32,7 +31,7 @@ message ResourceMetric {
     ResourceMetric.Kind kind = 2;
     string name = 3;
     string value = 4;
-    repeated Label labels = 5;
+    repeated MetricLabel labels = 5;
     string org_id = 6;
     string resource_id = 7;
     string resource_name = 8;

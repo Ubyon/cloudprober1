@@ -34,15 +34,12 @@ import (
 
 // Surfacer structures for writing to tss.
 type Surfacer struct {
-	config        *tsspb.SurfacerConf
-	opts          *options.Options
-	tssStreamChan chan *metrics.EventMetrics
-    tssClient     *tssclient.GrpcTelemetryClientT
-	logger        *logger.Logger
-}
-
-type Metric struct {
-    ResourceMetrics []*tsspb.ResourceMetric
+	cfg             *tsspb.SurfacerConf
+	opts            *options.Options
+	tssStreamChan   chan *metrics.EventMetrics
+    tssClient       *tssclient.GrpcTelemetryClientT
+    tssClientSeqNo  string
+	logger          *logger.Logger
 }
 
 /*
@@ -65,34 +62,61 @@ func updateLabelMap(labels map[string]string, extraLabels ...[2]string) map[stri
     return labelsCopy
 }
 
-func (s *Surfacer) getKind(em *metrics.EventMetrics)  pb.ResourceMetric_Kind {
+func (s *Surfacer) getKind(em *metrics.EventMetrics)  tsspb.ResourceMetric_Kind {
+    var pbKind tsspb.ResourceMetric_Kind
     switch em.Kind {
     case metrics.CUMULATIVE:
-        return pb.ResourceMetric_COUNTER
+        pbKind = tsspb.ResourceMetric_COUNTER
     case metrics.GAUGE:
-        return pb.ResourceMetric_GUAGE
+        pbKind = tsspb.ResourceMetric_GUAGE
     default:
-        return pb.ResourceMetric_UNKNOWN
+        pbKind = tsspb.ResourceMetric_UNKNOWN
     }
+
+    return pbKind
 }
 
+func (s *Surfacer) getKind(em *metrics.EventMetrics)  tsspb.ResourceMetric_Kind {
+    var pbType tsspb.ResourceMetric_Type
+    switch em.Label("ptype") {
+    case "http":
+        pbType = tsspb.ResourceMetric_HTTP
+    default:
+        pbType = tsspb.ResourceMetric_INVALID
+    }
+
+    return pbType
+}
+
+func (s *Surfacer) getLabels(labels map[string]string) []*tsspb.MetricLabel {
+    pbLabels := []*tsspb.MetricLabel{}
+
+    for k, v := range labels {
+        pbLabel := &tsspb.MetricLabel{
+            Key : k,
+            Value: v,
+            Scope: tsspb.MetricLabel_RESOURCE,
+        }
+
+        pbLabels = append(pbLabels, pbLabel)
+    }
+
+    return pbLabels
+}
 
 func (s *Surfacer) newResourceMetric(em *metrics.EventMetrics, 
                         name, value string, labels map[string]string) *tsspb.ResourceMetric {
-    //TODO SM (get org/resource info and add it to resource metric)
-    var pbType tsspb.ResourceMetric_Type
-    switch rm.Type {
-    case HttpResourceMetricType:
-        pbType = pb.ResourceMetric_HTTP
-    case HttpsResourceMetricType:
-        pbType = pb.ResourceMetric_HTTPS
-    default:
-        pbType = pb.ResourceMetric_INVALID
-    }
-
     return &tsspb.ResourceMetric{
         Type: s.getType(em),
-        Kind: s.getKind(em)
+        Kind: s.getKind(em),
+        Name: name,
+        Value: value,
+        Labels: s.getLabels(labels),
+        OrgId: em.Label("org_id"),
+        ResourceId: em.Label("resource_id"),
+        ResourceName: em.Label("resource_name"),
+        GeneratedBy: tsspb.ResourceMetric_TG,
+        Timestamp: em.Timestamp,
 	}
 }
 
@@ -135,13 +159,13 @@ func (s *Surfacer) mapToResourceMetrics[T int64 | float64](m *metrics.Map[T],
 	return resMetrics
 }
 
-func (s *Surfacer) emToResourceMetrics(em *metrics.EventMetrics) []resourceMetric {
+func (s *Surfacer) emToResourceMetrics(em *metrics.EventMetrics) []*tsspb.ResourceMetric {
 	baseLabels := make(map[string]string)
 	for _, k := range em.LabelsKeys() {
 		baseLabels[k] = em.Label(k)
 	}
 
-	resMetrics := []resourceMetric{}
+	resMetrics := []*tsspb.ResourceMetric{}
 	for _, metricName := range em.MetricsKeys() {
 		if !s.opts.AllowMetric(metricName) {
 			continue
@@ -172,11 +196,43 @@ func (s *Surfacer) emToResourceMetrics(em *metrics.EventMetrics) []resourceMetri
 
 		resMetrics = append(resMetrics, s.newResourceMetric(em, metricName, val.String(), baseLabels))
 	}
+
 	return resMetrics
 }
 
 func (s *Surfacer) streamMetrics(em *metrics.EventMetrics) error {
-    //TODO stream the data
+    if s.tssClient == nil {
+        err := errors.New("Invalid TSSClient")
+		s.logger.Errorf("Stream metrics err %v", err)
+		return err
+	}
+
+	stream, cancelFn, err := s.tssClient.OpenStream()
+	defer s.tssClient.CloseStream(stream, cancelFn)
+	if err != nil {
+		s.logger.Errorf("OpenStream err %v", err)
+		return err
+	}
+
+    rm := s.emToResourceMetrics(em)
+    data, err := proto.Marshal(rm)
+	if err != nil {
+		s.logger.Errorf("Proto marshal err %v", err)
+		return err
+	}
+
+    topicName := s.cfg.GetTopicName()
+    seqNo := atomic.AddUint64(&s.tssClientSeqNo, 1)
+    orgId := em.Label("org_id")
+    //TODO SM - userId, clientId???
+	err = al.tssClient.SendMessage(stream, topicName, "",
+		data, seqNo, orgId, "")
+	if err != nil {
+		s.logger.Errorf("OpenStream send message err %v", err)
+		return err
+	}
+
+	return nil
 }
 
 func New(ctx context.Context, config *tsspb.SurfacerConf, logger *logger.Logger) (*Surfacer, error) {
