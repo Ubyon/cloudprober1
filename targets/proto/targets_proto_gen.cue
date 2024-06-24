@@ -190,8 +190,7 @@ import (
 
 // DummyTargets represent empty targets, which are useful for external
 // probes that do not have any "proper" targets.  Such as ilbprober.
-#DummyTargets: {
-}
+#DummyTargets: {}
 
 // Global targets options. These options are independent of the per-probe
 // targets which are defined by the "Targets" type above.

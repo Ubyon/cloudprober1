@@ -2,17 +2,13 @@ package proto
 
 import "github.com/cloudprober/cloudprober/internal/tlsconfig/proto"
 
-#Pods: {
-}
+#Pods: {}
 
-#Endpoints: {
-}
+#Endpoints: {}
 
-#Services: {
-}
+#Services: {}
 
-#Ingresses: {
-}
+#Ingresses: {}
 
 // Kubernetes provider config.
 #ProviderConfig: {
