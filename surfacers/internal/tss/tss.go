@@ -16,12 +16,14 @@ package tss
 
 import (
 	"context"
-	"database/sql"
-	"encoding/json"
+    "encoding/json"
+    "errors"
     "io/ioutil"
     "os"
 	"strconv"
-	"time"
+    "sync/atomic"
+
+    "google.golang.org/protobuf/types/known/timestamppb"
 
 	"github.com/cloudprober/cloudprober/logger"
 	"github.com/cloudprober/cloudprober/metrics"
@@ -37,28 +39,23 @@ type Surfacer struct {
 	opts            *options.Options
 	tssStreamChan   chan *metrics.EventMetrics
     tssClient       *tssclient.GrpcTelemetryClientT
-    tssClientSeqNo  string
+    tssClientSeqNo  uint64
 	logger          *logger.Logger
 }
 
 /*
 * Private functions
 */
-func updateLabelMap(labels map[string]string, extraLabels ...[2]string) map[string]string {
-	if len(extraLabels) == 0 {
-		return labels
-	}
+func (s *Surfacer) getType(em *metrics.EventMetrics)  tsspb.ResourceMetric_Type {
+    var pbType tsspb.ResourceMetric_Type
+    switch em.Label("ptype") {
+    case "http":
+        pbType = tsspb.ResourceMetric_HTTP
+    default:
+        pbType = tsspb.ResourceMetric_INVALID
+    }
 
-    labelsCopy := make(map[string]string)
-	for k, v := range labels {
-		labelsCopy[k] = v
-	}
-
-    for _, extraLabel := range extraLabels {
-		labelsCopy[extraLabel[0]] = extraLabel[1]
-	}
-
-    return labelsCopy
+    return pbType
 }
 
 func (s *Surfacer) getKind(em *metrics.EventMetrics)  tsspb.ResourceMetric_Kind {
@@ -69,22 +66,10 @@ func (s *Surfacer) getKind(em *metrics.EventMetrics)  tsspb.ResourceMetric_Kind 
     case metrics.GAUGE:
         pbKind = tsspb.ResourceMetric_GUAGE
     default:
-        pbKind = tsspb.ResourceMetric_UNKNOWN
+        pbKind = tsspb.ResourceMetric_UNDEFINED
     }
 
     return pbKind
-}
-
-func (s *Surfacer) getKind(em *metrics.EventMetrics)  tsspb.ResourceMetric_Kind {
-    var pbType tsspb.ResourceMetric_Type
-    switch em.Label("ptype") {
-    case "http":
-        pbType = tsspb.ResourceMetric_HTTP
-    default:
-        pbType = tsspb.ResourceMetric_INVALID
-    }
-
-    return pbType
 }
 
 func (s *Surfacer) getLabels(labels map[string]string) []*tsspb.MetricLabel {
@@ -115,13 +100,30 @@ func (s *Surfacer) newResourceMetric(em *metrics.EventMetrics,
         ResourceId: em.Label("resource_id"),
         ResourceName: em.Label("resource_name"),
         GeneratedBy: tsspb.ResourceMetric_TG,
-        Timestamp: em.Timestamp,
+        Timestamp: timestamppb.New(em.Timestamp),
 	}
+}
+
+func updateLabelMap(labels map[string]string, extraLabels ...[2]string) map[string]string {
+	if len(extraLabels) == 0 {
+		return labels
+	}
+
+    labelsCopy := make(map[string]string)
+	for k, v := range labels {
+		labelsCopy[k] = v
+	}
+
+    for _, extraLabel := range extraLabels {
+		labelsCopy[extraLabel[0]] = extraLabel[1]
+	}
+
+    return labelsCopy
 }
 
 func (s *Surfacer) distToResourceMetrics(d *metrics.DistributionData, em *metrics.EventMetrics,
                             metricName string, labels map[string]string) []*tsspb.ResourceMetric {
-	resMerics := []*tsspb.ResourceMetric{
+	resMetrics := []*tsspb.ResourceMetric{
 		s.newResourceMetric(em, metricName+"_sum", strconv.FormatFloat(d.Sum, 'f', -1, 64), labels),
 		s.newResourceMetric(em, metricName+"_count", strconv.FormatInt(d.Count, 10), labels),
 	}
@@ -139,19 +141,32 @@ func (s *Surfacer) distToResourceMetrics(d *metrics.DistributionData, em *metric
 
         labelsWithBucket := updateLabelMap(labels, [2]string{"le", lb})
         brm := s.newResourceMetric(em, metricName+"_bucket", strconv.FormatInt(val, 10), labelsWithBucket)
-		resMetrics = append(resMerics, brm)
+		resMetrics = append(resMetrics, brm)
 	}
 
 	return resMetrics
 }
 
-func (s *Surfacer) mapToResourceMetrics[T int64 | float64](m *metrics.Map[T],
+func (s *Surfacer) intMapToResourceMetrics(m *metrics.Map[int64],
                     em *metrics.EventMetrics, metricName string,
                     baseLabels map[string]string) []*tsspb.ResourceMetric {
 	resMetrics := []*tsspb.ResourceMetric{}
 	for _, k := range m.Keys() {
 		labels := updateLabelMap(baseLabels, [2]string{m.MapName, k})
-        irm := s.newResourceMetric(em, metricName, metrics.MapValueToString[T](m.GetKey(k)), labels)
+        irm := s.newResourceMetric(em, metricName, metrics.MapValueToString[int64](m.GetKey(k)), labels)
+		resMetrics = append(resMetrics, irm)
+	}
+
+	return resMetrics
+}
+
+func (s *Surfacer) floatMapToResourceMetrics(m *metrics.Map[float64],
+                    em *metrics.EventMetrics, metricName string,
+                    baseLabels map[string]string) []*tsspb.ResourceMetric {
+	resMetrics := []*tsspb.ResourceMetric{}
+	for _, k := range m.Keys() {
+		labels := updateLabelMap(baseLabels, [2]string{m.MapName, k})
+        irm := s.newResourceMetric(em, metricName, metrics.MapValueToString[float64](m.GetKey(k)), labels)
 		resMetrics = append(resMetrics, irm)
 	}
 
@@ -173,12 +188,12 @@ func (s *Surfacer) emToResourceMetrics(em *metrics.EventMetrics) []*tsspb.Resour
 		val := em.Metric(metricName)
 
 		if mapVal, ok := val.(*metrics.Map[int64]); ok {
-			resMetrics = append(resMetrics, s.mapToResourceMetrics(mapVal, em, metricName, baseLabels)...)
+			resMetrics = append(resMetrics, s.intMapToResourceMetrics(mapVal, em, metricName, baseLabels)...)
 			continue
 		}
 
         if mapVal, ok := val.(*metrics.Map[float64]); ok {
-			resMetrics = append(resMetrics, s.mapToResourceMetrics(mapVal, em, metricName, baseLabels)...)
+			resMetrics = append(resMetrics, s.floatMapToResourceMetrics(mapVal, em, metricName, baseLabels)...)
 			continue
 		}
 
@@ -214,7 +229,7 @@ func (s *Surfacer) streamMetrics(em *metrics.EventMetrics) error {
 	}
 
     rm := s.emToResourceMetrics(em)
-    data, err := proto.Marshal(rm)
+    data, err := json.Marshal(rm)
 	if err != nil {
 		s.logger.Errorf("Proto marshal err %v", err)
 		return err
@@ -224,7 +239,7 @@ func (s *Surfacer) streamMetrics(em *metrics.EventMetrics) error {
     seqNo := atomic.AddUint64(&s.tssClientSeqNo, 1)
     orgId := em.Label("org_id")
     //TODO SM - userId, clientId???
-	err = al.tssClient.SendMessage(stream, topicName, "",
+	err = s.tssClient.SendMessage(stream, topicName, "",
 		data, seqNo, orgId, "")
 	if err != nil {
 		s.logger.Errorf("OpenStream send message err %v", err)
@@ -253,13 +268,14 @@ func (s *Surfacer) init(ctx context.Context) error {
     isTls := s.cfg.GetIsTls()
     caPem, err := ioutil.ReadFile(os.Getenv("CA_FILE"))
     if err != nil {
-        s.logger.Fatalf("Failed to read ca file: %v", err)
+        s.logger.Errorf("Failed to read ca file: %v", err)
+        return err
     }
 
-    s.tssClient := tssclient.NewGrpcClient(serverAddr, gConn)
+    s.tssClient = tssclient.NewGrpcClient(serverAddr, nil)
     s.tssClient.SetSecureMode(isTls)
-    s.tssCient.SetCertificateAuthority(caPem)
-    err := s.tssClient.Start()
+    s.tssClient.SetCertificateAuthority(caPem)
+    err = s.tssClient.Start()
 	if err != nil {
 		return err
 	}

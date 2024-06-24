@@ -3,6 +3,7 @@ module github.com/cloudprober/cloudprober
 go 1.21
 
 require (
+	bitbucket.org/ubyon/golibs/ubyon/tssclient v0.0.0-20240613123936-105e363ca531
 	cloud.google.com/go/bigquery v1.56.0
 	cloud.google.com/go/compute/metadata v0.2.3
 	cloud.google.com/go/logging v1.8.1
@@ -37,6 +38,9 @@ require (
 )
 
 require (
+	bitbucket.org/ubyon/core-common/proto/telemetrysrvr/golang v0.0.0-20221024150422-5ec1a847d8f7 // indirect
+	bitbucket.org/ubyon/golibs/grpcclient/conn v0.0.0-20221025094014-8ee636f9eb07 // indirect
+	bitbucket.org/ubyon/golibs/logger v0.0.0-20221025094014-8ee636f9eb07 // indirect
 	cloud.google.com/go v0.110.8 // indirect
 	cloud.google.com/go/compute v1.23.0 // indirect
 	cloud.google.com/go/iam v1.1.2 // indirect
@@ -111,3 +115,5 @@ require (
 	golang.org/x/tools v0.16.1
 	google.golang.org/appengine v1.6.7 // indirect
 )
+
+replace github.com/cloudprober/cloudprober => github.com/ubyon/cloudprober1 v0.0.0-20240621211417-c227ead67c2c

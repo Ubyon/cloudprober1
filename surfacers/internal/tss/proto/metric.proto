@@ -1,4 +1,11 @@
 syntax = "proto3";
+
+package cloudprober.surfacer.tss;
+
+option go_package = "./;proto";
+
+import "google/protobuf/timestamp.proto";
+
     
 message MetricLabel {
     enum Scope {
@@ -22,7 +29,7 @@ message ResourceMetric {
         TG = 1;
     }
     enum Kind {
-        UNKNOWN = 0;
+        UNDEFINED = 0;
         COUNTER = 1;
         GUAGE = 2;
     }
