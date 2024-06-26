@@ -1,0 +1,27 @@
+APP_NAME=cloudprober
+APP_VERSION=0.1
+BUILD_VERSION=$(shell git rev-parse --short HEAD)
+
+ifeq ($(RELEASE),)
+  BUILD_VERSION := $(BUILD_VERSION)-$(USER)
+endif
+
+.PHONY: \
+	docker_build \
+	docker_rm \
+	docker_push
+
+all: \
+	docker_build \
+	docker_rm \
+	docker_push
+
+docker_build:
+	docker build -t quay.io/ubyon/${APP_NAME}:${APP_VERSION}-${BUILD_VERSION} \
+	  -f Dockerfile .
+
+docker_push: docker_build
+	docker push quay.io/ubyon/${APP_NAME}:${APP_VERSION}-${BUILD_VERSION}
+
+docker_rm: docker_push
+	docker rmi quay.io/ubyon/${APP_NAME}:${APP_VERSION}-${BUILD_VERSION}

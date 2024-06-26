@@ -5,15 +5,7 @@
 #   docker run --net host -v $PWD/cloudprober.cfg:/etc/cloudprober.cfg \
 #                         cloudprober/cloudprober
 FROM alpine
-COPY cloudprober-linux-* ./
-
-ARG TARGETPLATFORM
-RUN if [ "$TARGETPLATFORM" = "linux/amd64" ]; then \
-  mv cloudprober-linux-amd64 cloudprober && rm cloudprober-linux-*; fi
-RUN if [ "$TARGETPLATFORM" = "linux/arm64" ]; then \
-  mv cloudprober-linux-arm64 cloudprober && rm cloudprober-linux-*; fi
-RUN if [ "$TARGETPLATFORM" = "linux/arm/v7" ]; then \
-  mv cloudprober-linux-armv7 cloudprober && rm cloudprober-linux-*; fi
+COPY cloudprober ./
 
 # Metadata params
 ARG BUILD_DATE

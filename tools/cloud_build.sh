@@ -14,11 +14,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# This script builds cloudprober locally. It expects protobuf's Go code to
+# This script builds cloudprober from source. It expects protobuf's Go code to
 # be already available (can be done using tools/gen_pb_go.sh).
 
-PROTOC_VERSION="25.2"
-PROJECT="cloudprober1"
+PROTOC_VERSION="3.3.0"
+PROJECT="github.com/ubyon/cloudprober1"
 
 GOPATH=$(go env GOPATH)
 
@@ -27,30 +27,18 @@ if [ -z "$GOPATH" ]; then
   echo "https://golang.org/doc/code.html to set up Go environment."
   exit 1
 fi
-echo GOPATH=${GOPATH}
 
-if [ -z ${PROJECTROOT+x} ]; then
-  # If PROJECTROOT is not set, try to determine it from script's location
-  SCRIPTDIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-  if [[ $SCRIPTDIR == *"$PROJECT/tools"* ]]; then
-    PROJECTROOT="${SCRIPTDIR}/.."
-  else
-    echo "PROJECTROOT is not set and we are not able to determine PROJECTROOT"
-    echo "from script's path. PROJECTROOT should be set such that project files "
-    echo " are located at $PROJECT relative to the PROJECTROOT."
-    exit 1
-  fi
-fi
-echo PROJECTROOT=${PROJECTROOT}
+# Change directory to the project workspace in GOPATH
+project_dir="${GOPATH}/src/${PROJECT}"
 
-if [ ! -d "${PROJECTROOT}" ];then
+if [ ! -d "${project_dir}" ];then
   echo "${PROJECT} not found under Go workspace: ${GOPATH}/src. Please download"
   echo " cloudprober source code from github.com/cloudprober/cloudprober and set it "
-  echo "such that it's available at ${PROJECTROOT}."
+  echo "such that it's available at ${project_dir}."
   exit 1
 fi
 
-cd ${PROJECTROOT}
+cd ${project_dir}
 # Get all dependencies
 echo "Getting all the dependencies.."
 echo "======================================================================"
