@@ -102,7 +102,7 @@ func (s *Surfacer) newResourceMetric(em *metrics.EventMetrics,
         OrgId: em.Label("org_id"),
         ResourceId: em.Label("resource_id"),
         ResourceName: em.Label("resource_name"),
-        GeneratedBy: tsspb.ResourceMetric_TG,
+        GeneratedBy: em.Label("generated_by"),
         Timestamp: timestamppb.New(em.Timestamp),
 	}
 }

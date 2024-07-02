@@ -24,10 +24,6 @@ message ResourceMetric {
         INVALID = 0;
         HTTP = 1;
     }
-    enum GeneratedBy {
-        UNKNOWN = 0;
-        TG = 1;
-    }
     enum Kind {
         UNDEFINED = 0;
         COUNTER = 1;
@@ -42,7 +38,7 @@ message ResourceMetric {
     string org_id = 6;
     string resource_id = 7;
     string resource_name = 8;
-    ResourceMetric.GeneratedBy generated_by = 9;
+    string generated_by = 9;
 
     google.protobuf.Timestamp timestamp = 15;
 }
