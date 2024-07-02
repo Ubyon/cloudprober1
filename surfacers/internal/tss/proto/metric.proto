@@ -46,3 +46,7 @@ message ResourceMetric {
 
     google.protobuf.Timestamp timestamp = 15;
 }
+
+message ResourceMetricList {
+    repeated ResourceMetric metrics = 1;
+}

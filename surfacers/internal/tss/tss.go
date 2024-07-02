@@ -16,14 +16,13 @@ package tss
 
 import (
 	"context"
-    "encoding/json"
     "errors"
     "io/ioutil"
     "os"
 	"strconv"
     "sync/atomic"
 
-    _ "google.golang.org/protobuf/encoding/protojson"
+    "google.golang.org/protobuf/proto"
     "google.golang.org/protobuf/types/known/timestamppb"
 
 	"github.com/cloudprober/cloudprober/logger"
@@ -177,7 +176,7 @@ func (s *Surfacer) floatMapToResourceMetrics(m *metrics.Map[float64],
 	return resMetrics
 }
 
-func (s *Surfacer) emToResourceMetrics(em *metrics.EventMetrics) []*tsspb.ResourceMetric {
+func (s *Surfacer) emToResourceMetrics(em *metrics.EventMetrics) *tsspb.ResourceMetricList {
 	baseLabels := make(map[string]string)
 	for _, k := range em.LabelsKeys() {
 		baseLabels[k] = em.Label(k)
@@ -215,7 +214,11 @@ func (s *Surfacer) emToResourceMetrics(em *metrics.EventMetrics) []*tsspb.Resour
 		resMetrics = append(resMetrics, s.newResourceMetric(em, metricName, val.String(), baseLabels))
 	}
 
-	return resMetrics
+    rml := &tsspb.ResourceMetricList {
+        Metrics: resMetrics,
+    }
+
+	return rml
 }
 
 func (s *Surfacer) streamMetrics(em *metrics.EventMetrics) error {
@@ -226,7 +229,7 @@ func (s *Surfacer) streamMetrics(em *metrics.EventMetrics) error {
 	}
 
     s.logger.Infof("Data before conversion %+v", em)
-    rms := s.emToResourceMetrics(em)
+    rml := s.emToResourceMetrics(em)
     // Convert to proto marshal if needed <-- discuss with SD
 
     /*
@@ -243,8 +246,8 @@ func (s *Surfacer) streamMetrics(em *metrics.EventMetrics) error {
         data = append(data, ldata)
     }*/
 
-    s.logger.Infof("Data to be sent %+v", rms)
-    jdata, err := json.Marshal(rms)
+    s.logger.Infof("Data to be sent %+v", rml)
+    jdata, err := proto.Marshal(rml)
     if err != nil {
         s.logger.Errorf("JSON marshal err %v", err)
         return err

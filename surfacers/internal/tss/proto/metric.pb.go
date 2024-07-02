@@ -393,6 +393,53 @@ func (x *ResourceMetric) GetTimestamp() *timestamppb.Timestamp {
 	return nil
 }
 
+type ResourceMetricList struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	Metrics []*ResourceMetric `protobuf:"bytes,1,rep,name=metrics,proto3" json:"metrics,omitempty"`
+}
+
+func (x *ResourceMetricList) Reset() {
+	*x = ResourceMetricList{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_github_com_cloudprober_cloudprober_surfacers_internal_tss_proto_metric_proto_msgTypes[2]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *ResourceMetricList) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ResourceMetricList) ProtoMessage() {}
+
+func (x *ResourceMetricList) ProtoReflect() protoreflect.Message {
+	mi := &file_github_com_cloudprober_cloudprober_surfacers_internal_tss_proto_metric_proto_msgTypes[2]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ResourceMetricList.ProtoReflect.Descriptor instead.
+func (*ResourceMetricList) Descriptor() ([]byte, []int) {
+	return file_github_com_cloudprober_cloudprober_surfacers_internal_tss_proto_metric_proto_rawDescGZIP(), []int{2}
+}
+
+func (x *ResourceMetricList) GetMetrics() []*ResourceMetric {
+	if x != nil {
+		return x.Metrics
+	}
+	return nil
+}
+
 var File_github_com_cloudprober_cloudprober_surfacers_internal_tss_proto_metric_proto protoreflect.FileDescriptor
 
 var file_github_com_cloudprober_cloudprober_surfacers_internal_tss_proto_metric_proto_rawDesc = []byte{
@@ -453,11 +500,17 @@ var file_github_com_cloudprober_cloudprober_surfacers_internal_tss_proto_metric_
 	0x0a, 0x02, 0x54, 0x47, 0x10, 0x01, 0x22, 0x2d, 0x0a, 0x04, 0x4b, 0x69, 0x6e, 0x64, 0x12, 0x0d,
 	0x0a, 0x09, 0x55, 0x4e, 0x44, 0x45, 0x46, 0x49, 0x4e, 0x45, 0x44, 0x10, 0x00, 0x12, 0x0b, 0x0a,
 	0x07, 0x43, 0x4f, 0x55, 0x4e, 0x54, 0x45, 0x52, 0x10, 0x01, 0x12, 0x09, 0x0a, 0x05, 0x47, 0x55,
-	0x41, 0x47, 0x45, 0x10, 0x02, 0x42, 0x41, 0x5a, 0x3f, 0x67, 0x69, 0x74, 0x68, 0x75, 0x62, 0x2e,
-	0x63, 0x6f, 0x6d, 0x2f, 0x63, 0x6c, 0x6f, 0x75, 0x64, 0x70, 0x72, 0x6f, 0x62, 0x65, 0x72, 0x2f,
-	0x63, 0x6c, 0x6f, 0x75, 0x64, 0x70, 0x72, 0x6f, 0x62, 0x65, 0x72, 0x2f, 0x73, 0x75, 0x72, 0x66,
-	0x61, 0x63, 0x65, 0x72, 0x73, 0x2f, 0x69, 0x6e, 0x74, 0x65, 0x72, 0x6e, 0x61, 0x6c, 0x2f, 0x74,
-	0x73, 0x73, 0x2f, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x62, 0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
+	0x41, 0x47, 0x45, 0x10, 0x02, 0x22, 0x58, 0x0a, 0x12, 0x52, 0x65, 0x73, 0x6f, 0x75, 0x72, 0x63,
+	0x65, 0x4d, 0x65, 0x74, 0x72, 0x69, 0x63, 0x4c, 0x69, 0x73, 0x74, 0x12, 0x42, 0x0a, 0x07, 0x6d,
+	0x65, 0x74, 0x72, 0x69, 0x63, 0x73, 0x18, 0x01, 0x20, 0x03, 0x28, 0x0b, 0x32, 0x28, 0x2e, 0x63,
+	0x6c, 0x6f, 0x75, 0x64, 0x70, 0x72, 0x6f, 0x62, 0x65, 0x72, 0x2e, 0x73, 0x75, 0x72, 0x66, 0x61,
+	0x63, 0x65, 0x72, 0x2e, 0x74, 0x73, 0x73, 0x2e, 0x52, 0x65, 0x73, 0x6f, 0x75, 0x72, 0x63, 0x65,
+	0x4d, 0x65, 0x74, 0x72, 0x69, 0x63, 0x52, 0x07, 0x6d, 0x65, 0x74, 0x72, 0x69, 0x63, 0x73, 0x42,
+	0x41, 0x5a, 0x3f, 0x67, 0x69, 0x74, 0x68, 0x75, 0x62, 0x2e, 0x63, 0x6f, 0x6d, 0x2f, 0x63, 0x6c,
+	0x6f, 0x75, 0x64, 0x70, 0x72, 0x6f, 0x62, 0x65, 0x72, 0x2f, 0x63, 0x6c, 0x6f, 0x75, 0x64, 0x70,
+	0x72, 0x6f, 0x62, 0x65, 0x72, 0x2f, 0x73, 0x75, 0x72, 0x66, 0x61, 0x63, 0x65, 0x72, 0x73, 0x2f,
+	0x69, 0x6e, 0x74, 0x65, 0x72, 0x6e, 0x61, 0x6c, 0x2f, 0x74, 0x73, 0x73, 0x2f, 0x70, 0x72, 0x6f,
+	0x74, 0x6f, 0x62, 0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
 }
 
 var (
@@ -473,7 +526,7 @@ func file_github_com_cloudprober_cloudprober_surfacers_internal_tss_proto_metric
 }
 
 var file_github_com_cloudprober_cloudprober_surfacers_internal_tss_proto_metric_proto_enumTypes = make([]protoimpl.EnumInfo, 4)
-var file_github_com_cloudprober_cloudprober_surfacers_internal_tss_proto_metric_proto_msgTypes = make([]protoimpl.MessageInfo, 2)
+var file_github_com_cloudprober_cloudprober_surfacers_internal_tss_proto_metric_proto_msgTypes = make([]protoimpl.MessageInfo, 3)
 var file_github_com_cloudprober_cloudprober_surfacers_internal_tss_proto_metric_proto_goTypes = []any{
 	(MetricLabel_Scope)(0),          // 0: cloudprober.surfacer.tss.MetricLabel.Scope
 	(ResourceMetric_Type)(0),        // 1: cloudprober.surfacer.tss.ResourceMetric.Type
@@ -481,7 +534,8 @@ var file_github_com_cloudprober_cloudprober_surfacers_internal_tss_proto_metric_
 	(ResourceMetric_Kind)(0),        // 3: cloudprober.surfacer.tss.ResourceMetric.Kind
 	(*MetricLabel)(nil),             // 4: cloudprober.surfacer.tss.MetricLabel
 	(*ResourceMetric)(nil),          // 5: cloudprober.surfacer.tss.ResourceMetric
-	(*timestamppb.Timestamp)(nil),   // 6: google.protobuf.Timestamp
+	(*ResourceMetricList)(nil),      // 6: cloudprober.surfacer.tss.ResourceMetricList
+	(*timestamppb.Timestamp)(nil),   // 7: google.protobuf.Timestamp
 }
 var file_github_com_cloudprober_cloudprober_surfacers_internal_tss_proto_metric_proto_depIdxs = []int32{
 	0, // 0: cloudprober.surfacer.tss.MetricLabel.scope:type_name -> cloudprober.surfacer.tss.MetricLabel.Scope
@@ -489,12 +543,13 @@ var file_github_com_cloudprober_cloudprober_surfacers_internal_tss_proto_metric_
 	3, // 2: cloudprober.surfacer.tss.ResourceMetric.kind:type_name -> cloudprober.surfacer.tss.ResourceMetric.Kind
 	4, // 3: cloudprober.surfacer.tss.ResourceMetric.labels:type_name -> cloudprober.surfacer.tss.MetricLabel
 	2, // 4: cloudprober.surfacer.tss.ResourceMetric.generated_by:type_name -> cloudprober.surfacer.tss.ResourceMetric.GeneratedBy
-	6, // 5: cloudprober.surfacer.tss.ResourceMetric.timestamp:type_name -> google.protobuf.Timestamp
-	6, // [6:6] is the sub-list for method output_type
-	6, // [6:6] is the sub-list for method input_type
-	6, // [6:6] is the sub-list for extension type_name
-	6, // [6:6] is the sub-list for extension extendee
-	0, // [0:6] is the sub-list for field type_name
+	7, // 5: cloudprober.surfacer.tss.ResourceMetric.timestamp:type_name -> google.protobuf.Timestamp
+	5, // 6: cloudprober.surfacer.tss.ResourceMetricList.metrics:type_name -> cloudprober.surfacer.tss.ResourceMetric
+	7, // [7:7] is the sub-list for method output_type
+	7, // [7:7] is the sub-list for method input_type
+	7, // [7:7] is the sub-list for extension type_name
+	7, // [7:7] is the sub-list for extension extendee
+	0, // [0:7] is the sub-list for field type_name
 }
 
 func init() { file_github_com_cloudprober_cloudprober_surfacers_internal_tss_proto_metric_proto_init() }
@@ -527,6 +582,18 @@ func file_github_com_cloudprober_cloudprober_surfacers_internal_tss_proto_metric
 				return nil
 			}
 		}
+		file_github_com_cloudprober_cloudprober_surfacers_internal_tss_proto_metric_proto_msgTypes[2].Exporter = func(v any, i int) any {
+			switch v := v.(*ResourceMetricList); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
 	}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
@@ -534,7 +601,7 @@ func file_github_com_cloudprober_cloudprober_surfacers_internal_tss_proto_metric
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: file_github_com_cloudprober_cloudprober_surfacers_internal_tss_proto_metric_proto_rawDesc,
 			NumEnums:      4,
-			NumMessages:   2,
+			NumMessages:   3,
 			NumExtensions: 0,
 			NumServices:   0,
 		},
