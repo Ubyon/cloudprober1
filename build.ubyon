@@ -1,0 +1,5 @@
+#./tools/pb_go.sh
+
+./tools/build.sh
+
+make -f Makefile.ci

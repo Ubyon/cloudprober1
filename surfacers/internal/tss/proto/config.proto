@@ -7,7 +7,7 @@ option go_package = "github.com/cloudprober/cloudprober/surfacers/internal/tss/p
 message SurfacerConf {
   required string connection_string = 1;
 
-  optional string topic_name = 2 [default = "resource-metrics"];
+  optional string topic_name = 2 [default = "cloudprober.metrics"];
 
   optional bool  is_tls = 3 [default = true];
 

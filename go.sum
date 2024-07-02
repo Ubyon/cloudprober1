@@ -10,6 +10,8 @@ bitbucket.org/ubyon/golibs/logger v0.0.0-20221025094014-8ee636f9eb07 h1:iGeSRdzh
 bitbucket.org/ubyon/golibs/logger v0.0.0-20221025094014-8ee636f9eb07/go.mod h1:rB6bc+zmpxp84RCXovFJz2rT9/aFcUucMRdqhTovLFI=
 bitbucket.org/ubyon/golibs/logger v0.0.0-20240613123936-105e363ca531 h1:bVj7pQIPzr8aRZOBFINLVq/MdMpyg9SmZNk2Z43OgHA=
 bitbucket.org/ubyon/golibs/logger v0.0.0-20240613123936-105e363ca531/go.mod h1:rB6bc+zmpxp84RCXovFJz2rT9/aFcUucMRdqhTovLFI=
+bitbucket.org/ubyon/golibs/logger/logrus v0.0.0-20240613123936-105e363ca531 h1:jkCyTcVIyxD+4RTF1Zdpik4/7wbbOMLw9LDoOvpZkNc=
+bitbucket.org/ubyon/golibs/logger/logrus v0.0.0-20240613123936-105e363ca531/go.mod h1:SY5bvWQhS4GxXVHIxEQik3urYKAjTTAoIrlTVadOsz4=
 bitbucket.org/ubyon/golibs/ubyon/tssclient v0.0.0-20240613123936-105e363ca531 h1:Sb39JH9WP/sFuzg3iwIo9gQIvDf4mQPN3AomcEx8grY=
 bitbucket.org/ubyon/golibs/ubyon/tssclient v0.0.0-20240613123936-105e363ca531/go.mod h1:Q3sDkNZNV+E5E5VFJ0nd4ODdNXfy9NWpAJ+vCxNWUAU=
 cel.dev/expr v0.15.0 h1:O1jzfJCQBfL5BFoYktaxwIhuttaQPsVWerH9/EEKx0w=
@@ -422,6 +424,8 @@ github.com/shopspring/decimal v1.2.0 h1:abSATXmQEYyShuxI4/vyW3tV1MrKAJzCZ/0zLUXY
 github.com/shopspring/decimal v1.2.0/go.mod h1:DKyhrW/HYNuLGql+MJL6WCR6knT2jwCFRcu2hWCYk4o=
 github.com/shopspring/decimal v1.4.0 h1:bxl37RwXBklmTi0C79JfXCEBD1cqqHt0bbgBAGFp81k=
 github.com/shopspring/decimal v1.4.0/go.mod h1:gawqmDU56v4yIKSwfBSFip1HdCCXN8/+DMd9qYNcwME=
+github.com/sirupsen/logrus v1.9.0 h1:trlNQbNUG3OdDrDil03MCb1H2o9nJ1x4/5LYw7byDE0=
+github.com/sirupsen/logrus v1.9.0/go.mod h1:naHLuLoDiP4jHNo9R0sCBMtWGeIprob74mVsIT4qYEQ=
 github.com/spf13/cast v1.3.1 h1:nFm6S0SMdyzrzcmThSipiEubIDy8WEXKNZ0UOgiRpng=
 github.com/spf13/cast v1.3.1/go.mod h1:Qx5cxh0v+4UWYiBimWS+eyWzqEqokIECu5etghLkUJE=
 github.com/spf13/cast v1.6.0 h1:GEiTHELF+vaR5dhz3VqZfFSzZjYbgeKDpBxQVS4GYJ0=
@@ -618,6 +622,7 @@ golang.org/x/sys v0.0.0-20201119102817-f84b799fce68/go.mod h1:h1NjWce9XRLGQEsW7w
 golang.org/x/sys v0.0.0-20210119212857-b64e53b001e4/go.mod h1:h1NjWce9XRLGQEsW7wpKNCjG9DtNlClVuFLEZdDNbEs=
 golang.org/x/sys v0.0.0-20210615035016-665e8c7367d1/go.mod h1:oPkhp1MJrh7nUepCBck5+mAzfO9JrbApNNgaTdGDITg=
 golang.org/x/sys v0.0.0-20220520151302-bc2c85ada10a/go.mod h1:oPkhp1MJrh7nUepCBck5+mAzfO9JrbApNNgaTdGDITg=
+golang.org/x/sys v0.0.0-20220715151400-c0bba94af5f8/go.mod h1:oPkhp1MJrh7nUepCBck5+mAzfO9JrbApNNgaTdGDITg=
 golang.org/x/sys v0.0.0-20220722155257-8c9f86f7a55f/go.mod h1:oPkhp1MJrh7nUepCBck5+mAzfO9JrbApNNgaTdGDITg=
 golang.org/x/sys v0.2.0/go.mod h1:oPkhp1MJrh7nUepCBck5+mAzfO9JrbApNNgaTdGDITg=
 golang.org/x/sys v0.5.0/go.mod h1:oPkhp1MJrh7nUepCBck5+mAzfO9JrbApNNgaTdGDITg=

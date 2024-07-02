@@ -23,6 +23,7 @@ import (
 	"strconv"
     "sync/atomic"
 
+    _ "google.golang.org/protobuf/encoding/protojson"
     "google.golang.org/protobuf/types/known/timestamppb"
 
 	"github.com/cloudprober/cloudprober/logger"
@@ -30,7 +31,10 @@ import (
 	"github.com/cloudprober/cloudprober/surfacers/internal/common/options"
     tsspb "github.com/cloudprober/cloudprober/surfacers/internal/tss/proto"
 
-    "bitbucket.org/ubyon/golibs/ubyon/tssclient"
+    gconn "bitbucket.org/ubyon/golibs/grpcclient/conn"
+    glgr "bitbucket.org/ubyon/golibs/logger"
+    tconn "bitbucket.org/ubyon/golibs/ubyon/tssclient"
+	ulrs "bitbucket.org/ubyon/golibs/logger/logrus"
 )
 
 // Surfacer structures for writing to tss.
@@ -38,7 +42,7 @@ type Surfacer struct {
 	cfg             *tsspb.SurfacerConf
 	opts            *options.Options
 	tssStreamChan   chan *metrics.EventMetrics
-    tssClient       *tssclient.GrpcTelemetryClientT
+    tssClient       *tconn.GrpcTelemetryClientT
     tssClientSeqNo  uint64
 	logger          *logger.Logger
 }
@@ -221,26 +225,45 @@ func (s *Surfacer) streamMetrics(em *metrics.EventMetrics) error {
 		return err
 	}
 
-	stream, cancelFn, err := s.tssClient.OpenStream()
-	defer s.tssClient.CloseStream(stream, cancelFn)
-	if err != nil {
-		s.logger.Errorf("OpenStream err %v", err)
-		return err
-	}
+    s.logger.Infof("Data before conversion %+v", em)
+    rms := s.emToResourceMetrics(em)
+    // Convert to proto marshal if needed <-- discuss with SD
 
-    rm := s.emToResourceMetrics(em)
-    data, err := json.Marshal(rm)
-	if err != nil {
-		s.logger.Errorf("Proto marshal err %v", err)
-		return err
-	}
+    /*
+    var data [][]byte
+    for _, rm := range rms {
+        ldata, err := protojson.MarshalOptions { EmitUnpopulated: true,
+                                                UseEnumNumbers:  false,
+                                              }.Marshal(rm)
+	    if err != nil {
+	    	s.logger.Errorf("Proto marshal err %v", err)
+            return err
+        }
+
+        data = append(data, ldata)
+    }*/
+
+    s.logger.Infof("Data to be sent %+v", rms)
+    jdata, err := json.Marshal(rms)
+    if err != nil {
+        s.logger.Errorf("JSON marshal err %v", err)
+        return err
+    }
+
+    stream, cancelFn, err := s.tssClient.OpenStream()
+	defer s.tssClient.CloseStream(stream, cancelFn)
+    if err != nil {
+        s.logger.Errorf("Open stream err %v", err)
+        return err
+    }
 
     topicName := s.cfg.GetTopicName()
     seqNo := atomic.AddUint64(&s.tssClientSeqNo, 1)
     orgId := em.Label("org_id")
-    //TODO SM - userId, clientId???
-	err = s.tssClient.SendMessage(stream, topicName, "",
-		data, seqNo, orgId, "")
+	err = s.tssClient.SendMessage(stream, 
+                topicName, "",
+		        jdata, seqNo, 
+                orgId, "")
 	if err != nil {
 		s.logger.Errorf("OpenStream send message err %v", err)
 		return err
@@ -266,17 +289,24 @@ func New(ctx context.Context, config *tsspb.SurfacerConf, logger *logger.Logger)
 func (s *Surfacer) init(ctx context.Context) error {
     serverAddr := s.cfg.GetConnectionString()
     isTls := s.cfg.GetIsTls()
-    caPem, err := ioutil.ReadFile(os.Getenv("CA_FILE"))
-    if err != nil {
-        s.logger.Errorf("Failed to read ca file: %v", err)
-        return err
+
+    grpcConn := gconn.NewConn(serverAddr, isTls)
+    ulrs.MkLogger(glgr.LogLevelDebug, "", nil, nil)
+    s.tssClient = tconn.NewGrpcClient(serverAddr, grpcConn)
+    s.tssClient.SetSecureMode(isTls)
+    if isTls {
+        caPem, err := ioutil.ReadFile(os.Getenv("CA_FILE"))
+        if err != nil {
+            s.logger.Errorf("CA file read error %v", err)
+            return err
+        }
+
+        s.tssClient.SetCertificateAuthority(caPem)
     }
 
-    s.tssClient = tssclient.NewGrpcClient(serverAddr, nil)
-    s.tssClient.SetSecureMode(isTls)
-    s.tssClient.SetCertificateAuthority(caPem)
-    err = s.tssClient.Start()
+    err := s.tssClient.Start()
 	if err != nil {
+        s.logger.Errorf("Tss client start err %v", err)
 		return err
 	}
 
@@ -296,7 +326,7 @@ func (s *Surfacer) init(ctx context.Context) error {
 
                 // Note: we may want to batch calls to streamMetrics, as each call results in
 				// a stream of data???
-				if err := s.streamMetrics(em); err != nil {
+                if err := s.streamMetrics(em); err != nil {
 					s.logger.Warningf("Error while writing metrics: %v", err)
 				}
 			}

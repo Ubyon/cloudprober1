@@ -3,6 +3,10 @@ module github.com/cloudprober/cloudprober
 go 1.21
 
 require (
+	bitbucket.org/ubyon/core-common/proto/telemetrysrvr/golang v0.0.0-20240603054411-5316caa52ea5
+	bitbucket.org/ubyon/golibs/grpcclient/conn v0.0.0-20240613123936-105e363ca531
+	bitbucket.org/ubyon/golibs/logger v0.0.0-20240613123936-105e363ca531
+	bitbucket.org/ubyon/golibs/logger/logrus v0.0.0-20240613123936-105e363ca531
 	bitbucket.org/ubyon/golibs/ubyon/tssclient v0.0.0-20240613123936-105e363ca531
 	cloud.google.com/go/bigquery v1.61.0
 	cloud.google.com/go/compute/metadata v0.3.0
@@ -38,9 +42,6 @@ require (
 )
 
 require (
-	bitbucket.org/ubyon/core-common/proto/telemetrysrvr/golang v0.0.0-20240603054411-5316caa52ea5 // indirect
-	bitbucket.org/ubyon/golibs/grpcclient/conn v0.0.0-20240613123936-105e363ca531 // indirect
-	bitbucket.org/ubyon/golibs/logger v0.0.0-20240613123936-105e363ca531 // indirect
 	cel.dev/expr v0.15.0 // indirect
 	cloud.google.com/go v0.115.0 // indirect
 	cloud.google.com/go/auth v0.5.2 // indirect
@@ -92,6 +93,7 @@ require (
 	github.com/pierrec/lz4/v4 v4.1.21 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/shopspring/decimal v1.4.0 // indirect
+	github.com/sirupsen/logrus v1.9.0 // indirect
 	github.com/spf13/cast v1.6.0 // indirect
 	github.com/zeebo/xxh3 v1.0.2 // indirect
 	go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc v0.52.0 // indirect

@@ -1,6 +1,7 @@
 APP_NAME=cloudprober
 APP_VERSION=0.1
 BUILD_VERSION=$(shell git rev-parse --short HEAD)
+BUILD_VERSION=f452696
 
 ifeq ($(RELEASE),)
   BUILD_VERSION := $(BUILD_VERSION)-$(USER)

@@ -87,6 +87,9 @@ go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@latest
 # Install cue from Go
 go install cuelang.org/go/cmd/cue@latest
 
+# Setting gopath to env
+export PATH=$PATH:$GOPATH/bin
+
 echo "Generating Go code and CUE schema for protobufs.."
 echo "======================================================================"
 # Generate protobuf code from the root directory to ensure proper import paths.
