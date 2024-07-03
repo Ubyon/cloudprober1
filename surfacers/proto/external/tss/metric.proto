@@ -16,7 +16,7 @@ message MetricLabel {
 
     string key = 1;
     string value = 2;
-    MetricLabel.Scope scope = 3;
+    Scope scope = 3;
 }
 
 message ResourceMetric {
@@ -30,16 +30,17 @@ message ResourceMetric {
         GUAGE = 2;
     }
 
-    ResourceMetric.Type type = 1;
-    ResourceMetric.Kind kind = 2;
+    Type type = 1;
+    Kind kind = 2;
     string name = 3;
-    string value = 4;
+    //string value = 4;
     repeated MetricLabel labels = 5;
     string org_id = 6;
     string resource_id = 7;
     string resource_name = 8;
     string generated_by = 9;
 
+    string foo = 10;
     google.protobuf.Timestamp timestamp = 15;
 }
 

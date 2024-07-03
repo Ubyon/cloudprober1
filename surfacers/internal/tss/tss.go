@@ -21,6 +21,7 @@ import (
     "os"
 	"strconv"
     "sync/atomic"
+    "github.com/davecgh/go-spew/spew"
 
     "google.golang.org/protobuf/proto"
     _ "google.golang.org/protobuf/types/known/timestamppb"
@@ -36,6 +37,8 @@ import (
     tconn "bitbucket.org/ubyon/golibs/ubyon/tssclient"
 	ulrs "bitbucket.org/ubyon/golibs/logger/logrus"
 )
+
+var spewCfg = spew.ConfigState{Indent: "\t", MaxDepth: 8, DisableMethods: true}
 
 // Surfacer structures for writing to tss.
 type Surfacer struct {
@@ -95,17 +98,19 @@ func (s *Surfacer) getLabels(labels map[string]string) []*etsspb.MetricLabel {
 func (s *Surfacer) newResourceMetric(em *metrics.EventMetrics, 
                         name, value string, labels map[string]string) *etsspb.ResourceMetric {
     return &etsspb.ResourceMetric{
+        Foo: "bar",
+        /*
         Type: s.getType(em),
         Kind: s.getKind(em),
         Name: name,
         Value: value,
-        
-        /*Labels: s.getLabels(labels),
+        Labels: s.getLabels(labels),
         OrgId: em.Label("org_id"),
         ResourceId: em.Label("resource_id"),
         ResourceName: em.Label("resource_name"),
         GeneratedBy: em.Label("generated_by"),
-        Timestamp: timestamppb.New(em.Timestamp),*/
+        Timestamp: timestamppb.New(em.Timestamp),
+        */
 	}
 }
 
@@ -267,6 +272,7 @@ func (s *Surfacer) streamMetrics(em *metrics.EventMetrics) error {
 		s.logger.Errorf("OpenStream send message err %v", err)
 		return err
 	}
+    s.logger.Infof("%v", spewCfg.Sdump(data))
 
 	return nil
 }
