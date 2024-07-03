@@ -1,4 +1,4 @@
-#./tools/pb_go.sh
+./tools/pb_go.sh
 
 ./tools/build.sh
 

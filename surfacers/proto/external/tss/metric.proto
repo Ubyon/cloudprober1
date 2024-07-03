@@ -19,11 +19,11 @@ message MetricLabel {
     Scope scope = 3;
 }
 
-/*
 message ResourceMetric {
     enum Type {
         INVALID = 0;
         HTTP = 1;
+        TCP = 2;
     }
     enum Kind {
         UNDEFINED = 0;
@@ -34,7 +34,7 @@ message ResourceMetric {
     Type type = 1;
     Kind kind = 2;
     string name = 3;
-    //string value = 4;
+    string value = 4;
     repeated MetricLabel labels = 5;
     string org_id = 6;
     string resource_id = 7;
@@ -43,23 +43,6 @@ message ResourceMetric {
 
     string foo = 10;
     google.protobuf.Timestamp timestamp = 15;
-}
-*/
-
-message ResourceMetric {
-    enum Type {
-        INVALID = 0;
-        HTTP = 1;
-    }
-    enum Kind {
-        UNDEFINED = 0;
-        COUNTER = 1;
-        GUAGE = 2;
-    }
-
-    Type type = 1;
-    Kind kind = 2;
-    string foo = 10;
 }
 
 message ResourceMetricList {

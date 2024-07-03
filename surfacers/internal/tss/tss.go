@@ -24,7 +24,7 @@ import (
     "github.com/davecgh/go-spew/spew"
 
     "google.golang.org/protobuf/proto"
-    _ "google.golang.org/protobuf/types/known/timestamppb"
+    "google.golang.org/protobuf/types/known/timestamppb"
 
 	"github.com/cloudprober/cloudprober/logger"
 	"github.com/cloudprober/cloudprober/metrics"
@@ -58,6 +58,8 @@ func (s *Surfacer) getType(em *metrics.EventMetrics)  etsspb.ResourceMetric_Type
     switch em.Label("ptype") {
     case "http":
         pbType = etsspb.ResourceMetric_HTTP
+    case "tcp":
+        pbType = etsspb.ResourceMetric_TCP
     default:
         pbType = etsspb.ResourceMetric_INVALID
     }
@@ -98,8 +100,6 @@ func (s *Surfacer) getLabels(labels map[string]string) []*etsspb.MetricLabel {
 func (s *Surfacer) newResourceMetric(em *metrics.EventMetrics, 
                         name, value string, labels map[string]string) *etsspb.ResourceMetric {
     return &etsspb.ResourceMetric{
-        Foo: "bar",
-        /*
         Type: s.getType(em),
         Kind: s.getKind(em),
         Name: name,
@@ -110,7 +110,6 @@ func (s *Surfacer) newResourceMetric(em *metrics.EventMetrics,
         ResourceName: em.Label("resource_name"),
         GeneratedBy: em.Label("generated_by"),
         Timestamp: timestamppb.New(em.Timestamp),
-        */
 	}
 }
 
@@ -244,15 +243,6 @@ func (s *Surfacer) streamMetrics(em *metrics.EventMetrics) error {
         s.logger.Errorf("JSON marshal err %v", err)
         return err
     }
-    
-    //Debug
-    foo := etsspb.ResourceMetricList{}
-    ferr := proto.Unmarshal(data, &foo)
-    if ferr != nil {
-        s.logger.Errorf("Proto unmarhal err %v", ferr)
-    }
-    s.logger.Infof("Proto unmarshal success %+v", foo)
-    //EOF Debug
 
     stream, cancelFn, err := s.tssClient.OpenStream()
 	defer s.tssClient.CloseStream(stream, cancelFn)
