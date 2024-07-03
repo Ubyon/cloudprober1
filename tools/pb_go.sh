@@ -114,15 +114,17 @@ find ${MODULE} -type d | \
   do
     # Ignore directories with no proto files.
     ls ${dir}/*.proto > /dev/null 2>&1 || continue
+    echo ${dir}
     ${protoc_path} --go-grpc_out=. --go_out=. ${dir}/*.proto
-    dirname=$(basename "$(dirname "$dir")")
-    if [ "${dirname}" == "tss" ]; then
-        ${protoc_path} --descriptor_set_out=${dir}/metric.desc --include_imports ${dir}/metric.proto
-    fi
+    #dirname=$(basename "$(dirname "$dir")")
+    #if [ "${dirname}" == "tss" ]; then
+    #    ${protoc_path} --descriptor_set_out=${dir}/metric.desc --include_imports ${dir}/metric.proto
+    #fi
   done
 
 # Copy generated files back to their original location.
-find ${MODULE} \( -name *.pb.go -o -name *proto_gen.cue -o -name *.desc \) | \
+find ${MODULE} \( -name *.pb.go -o -name *proto_gen.cue \) | \
+#find ${MODULE} \( -name *.pb.go -o -name *proto_gen.cue -o -name *.desc \) | \
   while read -r pbgofile
   do
     dst=${PROJECTROOT}/${PROJECT}/${pbgofile/github.com\/cloudprober\/cloudprober\//}

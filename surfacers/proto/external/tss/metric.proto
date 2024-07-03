@@ -1,8 +1,8 @@
 syntax = "proto3";
 
-package cloudprober.surfacer.tss;
+package cloudprober.surfacer.external.tss;
 
-option go_package = "github.com/cloudprober/cloudprober/surfacers/internal/tss/proto";
+option go_package = "github.com/cloudprober/cloudprober/surfacers/proto/external/tss";
 
 import "google/protobuf/timestamp.proto";
 
