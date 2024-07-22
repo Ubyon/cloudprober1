@@ -21,7 +21,6 @@ import (
     "os"
 	"strconv"
     "sync/atomic"
-    "github.com/davecgh/go-spew/spew"
 
     "google.golang.org/protobuf/proto"
     "google.golang.org/protobuf/types/known/timestamppb"
@@ -32,13 +31,12 @@ import (
     ctsspb "github.com/cloudprober/cloudprober/surfacers/internal/tss/proto"
     etsspb "github.com/cloudprober/cloudprober/surfacers/proto/external/tss"
 
-    gconn "bitbucket.org/ubyon/golibs/grpcclient/conn"
+    //gconn "bitbucket.org/ubyon/golibs/grpcclient/conn"
     glgr "bitbucket.org/ubyon/golibs/logger"
     tconn "bitbucket.org/ubyon/golibs/ubyon/tssclient"
 	ulrs "bitbucket.org/ubyon/golibs/logger/logrus"
 )
 
-var spewCfg = spew.ConfigState{Indent: "\t", MaxDepth: 8, DisableMethods: true}
 
 // Surfacer structures for writing to tss.
 type Surfacer struct {
@@ -234,10 +232,13 @@ func (s *Surfacer) streamMetrics(em *metrics.EventMetrics) error {
 		return err
 	}
 
-    s.logger.Infof("Data before conversion %+v", em)
+    s.logger.Debugf("\n--------------------------------")
+    s.logger.Debugf("Data before conversion %+v", em)
     rml := s.emToResourceMetrics(em)
 
-    s.logger.Infof("Data to be sent %+v", rml)
+    s.logger.Debugf("Data after conversion %+v", rml)
+    s.logger.Debugf("--------------------------------\n")
+
     data, err := proto.Marshal(rml)
     if err != nil {
         s.logger.Errorf("JSON marshal err %v", err)
@@ -262,7 +263,6 @@ func (s *Surfacer) streamMetrics(em *metrics.EventMetrics) error {
 		s.logger.Errorf("OpenStream send message err %v", err)
 		return err
 	}
-    s.logger.Infof("%v", spewCfg.Sdump(data))
 
 	return nil
 }
@@ -285,10 +285,9 @@ func (s *Surfacer) init(ctx context.Context) error {
     serverAddr := s.cfg.GetConnectionString()
     isTls := s.cfg.GetIsTls()
 
-    grpcConn := gconn.NewConn(serverAddr, isTls)
+    //grpcConn := gconn.NewConn(serverAddr, isTls)
     ulrs.MkLogger(glgr.LogLevelDebug, "", nil, nil)
-    s.tssClient = tconn.NewGrpcClient(serverAddr, grpcConn)
-    s.tssClient.SetSecureMode(isTls)
+    s.tssClient = tconn.NewGrpcClient(serverAddr, nil)
     if isTls {
         caPem, err := ioutil.ReadFile(os.Getenv("CA_FILE"))
         if err != nil {
@@ -298,6 +297,7 @@ func (s *Surfacer) init(ctx context.Context) error {
 
         s.tssClient.SetCertificateAuthority(caPem)
     }
+    s.tssClient.SetSecureMode(isTls)
 
     err := s.tssClient.Start()
 	if err != nil {
