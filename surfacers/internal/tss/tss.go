@@ -79,20 +79,28 @@ func (s *Surfacer) getKind(em *metrics.EventMetrics)  etsspb.ResourceMetric_Kind
     return pbKind
 }
 
-func (s *Surfacer) getLabels(labels map[string]string) []*etsspb.MetricLabel {
-    pbLabels := []*etsspb.MetricLabel{}
+func (s *Surfacer) getLabels(labels map[string]string) []*etsspb.ResourceMetricLabel {
+    pbLabels := []*etsspb.ResourceMetricLabel{}
 
     for k, v := range labels {
-        pbLabel := &etsspb.MetricLabel{
+        pbLabel := &etsspb.ResourceMetricLabel{
             Key : k,
             Value: v,
-            Scope: etsspb.MetricLabel_RESOURCE,
+            Scope: etsspb.ResourceMetricLabel_RESOURCE,
         }
 
         pbLabels = append(pbLabels, pbLabel)
     }
 
     return pbLabels
+}
+
+func (s *Surfacer) getProbeConfig(em *metrics.EventMetrics) *etsspb.ResourceMetricProbeConfig {
+    return &etsspb.ResourceMetricProbeConfig {
+        Name: em.Label("probe_name"),
+        Endpoint: em.Label("probe_endpoint"),
+        Port: em.Label("probe_port"),
+    }
 }
 
 func (s *Surfacer) newResourceMetric(em *metrics.EventMetrics, 
@@ -108,6 +116,7 @@ func (s *Surfacer) newResourceMetric(em *metrics.EventMetrics,
         ResourceName: em.Label("resource_name"),
         GeneratedBy: em.Label("generated_by"),
         Timestamp: timestamppb.New(em.Timestamp),
+        ProbeConfig: s.getProbeConfig(em),
 	}
 }
 

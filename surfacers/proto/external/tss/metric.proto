@@ -7,7 +7,7 @@ option go_package = "github.com/cloudprober/cloudprober/surfacers/proto/external
 import "google/protobuf/timestamp.proto";
 
     
-message MetricLabel {
+message ResourceMetricLabel {
     enum Scope {
         INVALID=0;
         ORG=1;
@@ -17,6 +17,12 @@ message MetricLabel {
     string key = 1;
     string value = 2;
     Scope scope = 3;
+}
+
+message ResourceMetricProbeConfig {
+    string Name = 1;
+    string Endpoint = 2;
+    string Port = 3;
 }
 
 message ResourceMetric {
@@ -35,13 +41,13 @@ message ResourceMetric {
     Kind kind = 2;
     string name = 3;
     string value = 4;
-    repeated MetricLabel labels = 5;
+    repeated ResourceMetricLabel labels = 5;
     string org_id = 6;
     string resource_id = 7;
     string resource_name = 8;
     string generated_by = 9;
+    ResourceMetricProbeConfig probeConfig = 10;
 
-    string foo = 10;
     google.protobuf.Timestamp timestamp = 15;
 }
 
